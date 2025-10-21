@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+  MapPin,
+  LucideIcon,
+} from "lucide-react";
 import { Badge, Button } from "~/components";
 import { Events } from "~/data";
 
@@ -66,56 +73,49 @@ export const EventCarousel = () => {
   };
 
   return (
-    <div className="relative w-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 overflow-hidden rounded-lg">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-red-500 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-red-400 rounded-full blur-3xl"></div>
-      </div>
+    <div className="relative w-full overflow-hidden rounded-lg mb-12">
+      <div
+        className="absolute inset-0 bg-cover bg-center blur-xl"
+        style={{
+          backgroundImage: `url(${currentEvent.image})`,
+        }}
+      ></div>
+
+      <div className="absolute inset-0 bg-black/60"></div>
 
       <div className="relative z-10">
         {/* Main carousel content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8 lg:p-12 min-h-96">
-          {/* Left side - Image */}
-          <div className="relative flex items-center justify-center">
-            <div className="relative w-full h-full max-w-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 p-8 lg:p-12 ">
+          {/* Left side - Image and button */}
+          <div className="flex flex-col items-center justify-start gap-4 lg:col-span-2">
+            <div className="relative w-full h-60 rounded-xl overflow-hidden">
               <Image
                 src={currentEvent.image}
                 alt={currentEvent.title}
                 fill
-                className="object-cover rounded-lg"
+                className="object-cover"
               />
             </div>
+            <Button size="lg" className="w-full">
+              Xem chi tiết
+            </Button>
           </div>
 
           {/* Right side - Event details */}
-          <div className="hidden lg:block">
-            <div className="flex flex-col justify-center space-y-6 text-white">
-              {/* Category */}
-              <div className="space-y-2">
-                <Badge variant="secondary">{currentEvent.category}</Badge>
-              </div>
+          <div className="flex flex-col justify-center flex-1 text-white lg:col-span-3 gap-5">
+            {/* Category badge */}
+            <Badge variant="secondary">{currentEvent.category}</Badge>
 
-              {/* Title */}
-              <h2 className="text-5xl font-bold text-red-400 line-clamp-2">
-                {currentEvent.title}
-              </h2>
+            {/* Title */}
+            <h2 className="text-3xl font-bold text-white line-clamp-2 mb-4">
+              {currentEvent.title}
+            </h2>
 
-              {/* Description */}
-              <p className="text-gray-300 italic line-clamp-5">
-                {currentEvent.description}
-              </p>
-
-              {/* Showtime badge */}
-              <p className="text-xs text-gray-400">{currentEvent.date}</p>
-
-              <div className="pt-4 border-t border-red-400/20">
-                <div className="text-xs text-gray-400 mb-1">GIÁ VÉ TỪ</div>
-                <div className="text-2xl font-bold text-red-400">
-                  {formatPrice(currentEvent.minPrice)}đ
-                </div>
-              </div>
-            </div>
+            <InfoItem icon={Calendar}>{currentEvent.date}</InfoItem>
+            <InfoItem icon={MapPin}>{currentEvent.location}</InfoItem>
+            <InfoItem icon={DollarSign}>
+              Từ {formatPrice(currentEvent.minPrice)} VND
+            </InfoItem>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ export const EventCarousel = () => {
               onClick={() => goToSlide(index)}
               className={`w-2 h-2 rounded-full transition-all ${
                 index === currentIndex
-                  ? "bg-red-400 w-8"
+                  ? "bg-primary w-8"
                   : "bg-gray-500 hover:bg-gray-400"
               }`}
               aria-label={`Go to slide ${index + 1}`}
@@ -152,6 +152,21 @@ export const EventCarousel = () => {
           ))}
         </div>
       </div>
+    </div>
+  );
+};
+
+const InfoItem = ({
+  icon: Icon,
+  children,
+}: {
+  icon: LucideIcon;
+  children: React.ReactNode;
+}) => {
+  return (
+    <div className="flex items-start gap-3 text-white">
+      <Icon className="w-6 h-6 shrink-0" />
+      <p>{children}</p>
     </div>
   );
 };
