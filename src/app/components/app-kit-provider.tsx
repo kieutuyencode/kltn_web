@@ -1,0 +1,46 @@
+"use client";
+
+import { ReactNode } from "react";
+import { EthersAdapter } from "@reown/appkit-adapter-ethers";
+import { defineChain } from "@reown/appkit/networks";
+import { createAppKit } from "@reown/appkit/react";
+import { Env } from "~/constants";
+
+const bscTestnet = defineChain({
+  id: 97,
+  caipNetworkId: "eip155:97",
+  chainNamespace: "eip155",
+  name: "BNB Smart Chain Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Binance Chain Native Token",
+    symbol: "tBNB",
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://data-seed-prebsc-1-s1.binance.org:8545"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "BscScan",
+      url: "https://testnet.bscscan.com",
+    },
+  },
+});
+
+createAppKit({
+  adapters: [new EthersAdapter()],
+  networks: [bscTestnet],
+  defaultNetwork: bscTestnet,
+  projectId: Env.NEXT_PUBLIC_REOWN_PROJECT_ID,
+  features: {
+    socials: false,
+    email: false,
+    analytics: false,
+  },
+});
+
+export const AppKitProvider = ({ children }: { children: ReactNode }) => {
+  return <>{children}</>;
+};
