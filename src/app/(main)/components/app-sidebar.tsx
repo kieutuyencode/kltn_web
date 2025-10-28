@@ -17,6 +17,11 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -29,6 +34,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "~/components";
+import { SignIn } from "./sign-in";
 
 // Thêm cấu trúc menu với các mục con (sub-items) để minh họa
 const navBar = [
@@ -149,10 +155,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           Đăng xuất
         </Button>
 
-        <Button variant="outline">
-          <LogIn />
-          Đăng nhập
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline">
+              <LogIn />
+              Đăng nhập
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-center">Đăng nhập</DialogTitle>
+            </DialogHeader>
+
+            <SignIn />
+          </DialogContent>
+        </Dialog>
       </SidebarFooter>
     </Sidebar>
   );
