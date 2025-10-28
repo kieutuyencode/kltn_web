@@ -9,9 +9,8 @@ import {
   Ticket,
   User,
 } from "lucide-react";
-import * as React from "react";
-// Thêm hook usePathname
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   Button,
   Collapsible,
@@ -19,8 +18,6 @@ import {
   CollapsibleTrigger,
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
   Sidebar,
   SidebarContent,
@@ -35,8 +32,9 @@ import {
   SidebarMenuSubItem,
 } from "~/components";
 import { SignIn } from "./sign-in";
+import { SignUp } from "./sign-up";
+import { RequestOTP, VerifyAndResetPassword } from "./forgot-password";
 
-// Thêm cấu trúc menu với các mục con (sub-items) để minh họa
 const navBar = [
   {
     title: "Trang chủ",
@@ -74,9 +72,73 @@ const navBar = [
   },
 ];
 
+type AuthFormType = "signIn" | "signUp" | "requestOtp" | "verifyOtp";
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Lấy đường dẫn URL hiện tại
   const pathname = usePathname();
+  // State để quản lý việc mở/đóng Dialog chung
+  const [isAuthModalOpen, setAuthModalOpen] = useState(false);
+  // State để quyết định form nào sẽ hiển thị
+  const [authFormType, setAuthFormType] = useState<AuthFormType>("signIn");
+  // State mới để lưu email giữa các bước
+  const [emailForReset, setEmailForReset] = useState<string>("");
+
+  // Hàm để mở Dialog và đặt loại form
+  const openAuthModal = (type: AuthFormType) => {
+    setAuthFormType(type);
+    setAuthModalOpen(true);
+  };
+
+  // Hàm đóng Dialog và reset về form đăng nhập mặc định
+  const closeAuthModal = () => {
+    setAuthModalOpen(false);
+  };
+
+  // Hàm được gọi sau khi gửi OTP thành công
+  const handleOTPSent = (sentEmail: string) => {
+    setEmailForReset(sentEmail); // Lưu email
+    setAuthFormType("verifyOtp"); // Chuyển sang form xác thực
+  };
+
+  const renderAuthForm = () => {
+    switch (authFormType) {
+      case "signUp":
+        return (
+          <SignUp
+            openSignIn={() => setAuthFormType("signIn")}
+            close={closeAuthModal}
+          />
+        );
+      case "requestOtp":
+        return (
+          <RequestOTP
+            onOTPSent={handleOTPSent}
+            openSignIn={() => setAuthFormType("signIn")}
+          />
+        );
+      case "verifyOtp":
+        return (
+          <VerifyAndResetPassword
+            email={emailForReset} // Sử dụng email đã lưu
+            openSignIn={() => setAuthFormType("signIn")}
+          />
+        );
+      case "signIn":
+      default:
+        return (
+          <SignIn
+            openSignUp={() => setAuthFormType("signUp")}
+            // Khi nhấn "Quên mật khẩu", chuyển sang bước yêu cầu OTP
+            openForgotPassword={() => {
+              setAuthFormType("requestOtp");
+              setEmailForReset("");
+            }}
+            close={closeAuthModal}
+          />
+        );
+    }
+  };
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -155,19 +217,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           Đăng xuất
         </Button>
 
-        <Dialog>
+        <Dialog open={isAuthModalOpen} onOpenChange={setAuthModalOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => openAuthModal("signIn")}>
               <LogIn />
               Đăng nhập
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="text-center">Đăng nhập</DialogTitle>
-            </DialogHeader>
-
-            <SignIn />
+            {renderAuthForm()}
           </DialogContent>
         </Dialog>
       </SidebarFooter>
