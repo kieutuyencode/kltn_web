@@ -49,11 +49,11 @@ const navBar = [
   {
     title: "Tổ chức sự kiện",
     icon: Calendar,
-    url: "/organizer/create",
+    url: "/organizer/create-event",
     items: [
       {
         title: "Tạo sự kiện",
-        url: "/organizer/create",
+        url: "/organizer/create-event",
       },
       {
         title: "Quản lý sự kiện",
