@@ -2,21 +2,33 @@
 
 import { Upload, X } from "lucide-react";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ImageUploadProps {
-  // Callback để truyền đối tượng File ra ngoài
+  // Callback để truyền đối tượng File ra ngoài khi có file mới
   onFileChange: (file: File | null) => void;
+  // Prop mới: nhận URL ảnh có sẵn từ API
+  initialImage?: string | null;
   className?: string;
 }
 
 export const ImageUpload = ({
   onFileChange,
+  initialImage = null,
   className = "",
 }: ImageUploadProps) => {
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // State để lưu trữ URL preview (có thể là base64 từ file local hoặc URL từ API)
+  const [imagePreview, setImagePreview] = useState<string | null>(initialImage);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Effect để cập nhật preview khi initialImage từ props thay đổi
+  useEffect(() => {
+    // Chỉ cập nhật nếu giá trị mới khác với giá trị hiện tại
+    if (initialImage !== imagePreview) {
+      setImagePreview(initialImage);
+    }
+  }, [initialImage]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -33,7 +45,7 @@ export const ImageUpload = ({
       // Gửi đối tượng File ra component cha
       onFileChange(file);
 
-      // Tạo URL preview
+      // Tạo URL preview cho file mới chọn
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -66,7 +78,10 @@ export const ImageUpload = ({
     e.preventDefault();
     e.stopPropagation();
     setImagePreview(null);
+    // Thông báo cho component cha rằng ảnh đã bị xóa (bằng cách gửi null)
     onFileChange(null);
+
+    // Reset input file nếu nó đã từng được dùng để chọn file
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -88,7 +103,6 @@ export const ImageUpload = ({
       onDragOver={handleDrag}
       onDrop={handleDrop}
     >
-      {/* ... phần JSX giữ nguyên như cũ, chỉ thay đổi logic xử lý file ... */}
       <input
         ref={fileInputRef}
         id="picture-upload"

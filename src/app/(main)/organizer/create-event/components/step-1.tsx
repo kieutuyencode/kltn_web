@@ -16,12 +16,13 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  FieldGroup,
+  Field,
+  FieldLabel,
 } from "~/components";
 
 export const Step1 = () => {
   // State để lưu các giá trị của form
-  const [eventName, setEventName] = useState("");
-  const [description, setDescription] = useState("");
   const [eventImageFile, setEventImageFile] = useState<File | null>(null); // State để lưu File
   const [isLoading, setIsLoading] = useState(false);
   const [eventType, setEventType] = useState("offline");
@@ -47,8 +48,6 @@ export const Step1 = () => {
     // 2. Đính kèm file và các dữ liệu khác
     // 'eventImage' là key mà backend sẽ dùng để nhận file
     formData.append("eventImage", eventImageFile);
-    formData.append("eventName", eventName);
-    formData.append("description", description);
     // Thêm các trường khác nếu cần...
     // formData.append("eventType", eventType);
 
@@ -79,7 +78,7 @@ export const Step1 = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-7">
       {/* Upload Ảnh */}
       <Card>
         <CardHeader>
@@ -95,110 +94,115 @@ export const Step1 = () => {
         <CardHeader>
           <CardTitle>Thông tin sự kiện</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="event-name">Tên sự kiện</Label>
-            <Input id="event-name" placeholder="Nhập tên sự kiện" />
-          </div>
+        <CardContent>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="event-name">Tên sự kiện</FieldLabel>
+              <Input id="event-name" placeholder="Nhập tên sự kiện" />
+            </Field>
 
-          <div>
-            <Label>Loại địa điểm</Label>
-            <RadioGroup
-              defaultValue="offline"
-              value={eventType}
-              onValueChange={setEventType}
-              className="flex gap-6 mt-2"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="offline" id="offline" />
-                <Label
-                  htmlFor="offline"
-                  className="mb-0 font-normal cursor-pointer"
-                >
-                  Sự kiện Offline
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="online" id="online" />
-                <Label
-                  htmlFor="online"
-                  className="mb-0 font-normal cursor-pointer"
-                >
-                  Sự kiện Online
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {eventType === "offline" && (
-            <>
-              <div>
-                <Label>Địa chỉ sự kiện</Label>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="province">Tỉnh/Thành phố</Label>
-                  <Select defaultValue="">
-                    <SelectTrigger id="province">
-                      <SelectValue placeholder="Chọn tỉnh/thành phố" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="hcm">Thành phố Hồ Chí Minh</SelectItem>
-                      <SelectItem value="hn">Hà Nội</SelectItem>
-                      <SelectItem value="dn">Đà Nẵng</SelectItem>
-                      <SelectItem value="ct">Cần Thơ</SelectItem>
-                    </SelectContent>
-                  </Select>
+            <Field>
+              <FieldLabel>Loại địa điểm</FieldLabel>
+              <RadioGroup
+                defaultValue="offline"
+                value={eventType}
+                onValueChange={setEventType}
+                className="flex gap-6 mt-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="offline" id="offline" />
+                  <Label
+                    htmlFor="offline"
+                    className="mb-0 font-normal cursor-pointer"
+                  >
+                    Sự kiện Offline
+                  </Label>
                 </div>
-
-                <div>
-                  <Label htmlFor="district">Quận/Huyện</Label>
-                  <Select defaultValue="">
-                    <SelectTrigger id="district">
-                      <SelectValue placeholder="Chọn quận/huyện" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bt">Quận Bình Thạnh</SelectItem>
-                      <SelectItem value="q1">Quận 1</SelectItem>
-                      <SelectItem value="q3">Quận 3</SelectItem>
-                      <SelectItem value="pn">Quận Phú Nhuận</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="online" id="online" />
+                  <Label
+                    htmlFor="online"
+                    className="mb-0 font-normal cursor-pointer"
+                  >
+                    Sự kiện Online
+                  </Label>
                 </div>
+              </RadioGroup>
+            </Field>
 
-                <div>
-                  <Label htmlFor="ward">Phường/Xã</Label>
-                  <Select defaultValue="">
-                    <SelectTrigger id="ward">
-                      <SelectValue placeholder="Chọn phường/xã" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="p1">Phường 1</SelectItem>
-                      <SelectItem value="p2">Phường 2</SelectItem>
-                      <SelectItem value="p26">Phường 26</SelectItem>
-                    </SelectContent>
-                  </Select>
+            {eventType === "offline" && (
+              <>
+                <Field>
+                  <FieldLabel>Địa chỉ sự kiện</FieldLabel>
+                  <Input id="address" placeholder="Nhập địa chỉ sự kiện" />
+                </Field>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+                  <Field>
+                    <FieldLabel htmlFor="province">Tỉnh/Thành phố</FieldLabel>
+                    <Select defaultValue="">
+                      <SelectTrigger id="province">
+                        <SelectValue placeholder="Chọn tỉnh/thành phố" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hcm">
+                          Thành phố Hồ Chí Minh
+                        </SelectItem>
+                        <SelectItem value="hn">Hà Nội</SelectItem>
+                        <SelectItem value="dn">Đà Nẵng</SelectItem>
+                        <SelectItem value="ct">Cần Thơ</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="district">Quận/Huyện</FieldLabel>
+                    <Select defaultValue="">
+                      <SelectTrigger id="district">
+                        <SelectValue placeholder="Chọn quận/huyện" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bt">Quận Bình Thạnh</SelectItem>
+                        <SelectItem value="q1">Quận 1</SelectItem>
+                        <SelectItem value="q3">Quận 3</SelectItem>
+                        <SelectItem value="pn">Quận Phú Nhuận</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="ward">Phường/Xã</FieldLabel>
+                    <Select defaultValue="">
+                      <SelectTrigger id="ward">
+                        <SelectValue placeholder="Chọn phường/xã" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="p1">Phường 1</SelectItem>
+                        <SelectItem value="p2">Phường 2</SelectItem>
+                        <SelectItem value="p26">Phường 26</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor="street">Số nhà, đường</FieldLabel>
+                    <Input id="street" placeholder="Nhập số nhà, tên đường" />
+                  </Field>
                 </div>
+              </>
+            )}
 
-                <div>
-                  <Label htmlFor="street">Số nhà, đường</Label>
-                  <Input id="street" placeholder="Nhập số nhà, tên đường" />
-                </div>
-              </div>
-            </>
-          )}
-
-          {eventType === "online" && (
-            <div>
-              <Label htmlFor="online-link">Link tham gia</Label>
-              <Input
-                id="online-link"
-                type="url"
-                placeholder="https://example.com/meeting"
-              />
-            </div>
-          )}
+            {eventType === "online" && (
+              <Field>
+                <FieldLabel htmlFor="online-link">Link tham gia</FieldLabel>
+                <Input
+                  id="online-link"
+                  type="url"
+                  placeholder="https://example.com/meeting"
+                />
+              </Field>
+            )}
+          </FieldGroup>
         </CardContent>
       </Card>
 
@@ -208,12 +212,14 @@ export const Step1 = () => {
           <CardTitle>Mô tả sự kiện</CardTitle>
         </CardHeader>
         <CardContent>
-          <Label htmlFor="description">Nội dung</Label>
-          <Textarea
-            id="description"
-            placeholder="Giới thiệu sơ lược về sự kiện của bạn..."
-            rows={8}
-          />
+          <Field>
+            <FieldLabel htmlFor="description">Nội dung</FieldLabel>
+            <Textarea
+              id="description"
+              placeholder="Giới thiệu sơ lược về sự kiện của bạn..."
+              rows={8}
+            />
+          </Field>
         </CardContent>
       </Card>
 

@@ -30,7 +30,7 @@ export const EventStepper = ({
               {/* Circle with number/icon */}
               <div
                 className={cn(
-                  "flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full font-bold transition-colors duration-300",
+                  "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full font-semibold transition-colors duration-300",
                   {
                     "bg-red-600 text-white": isCompleted || isCurrent,
                     "bg-gray-200 text-gray-500 group-hover:bg-gray-300":
@@ -41,14 +41,14 @@ export const EventStepper = ({
                 {isCompleted ? (
                   <Check className="h-5 w-5 md:h-6 md:w-6" />
                 ) : (
-                  <span className="text-base">{stepNumber}</span>
+                  <span className="text-sm">{stepNumber}</span>
                 )}
               </div>
 
               {/* Step name */}
               <p
                 className={cn(
-                  "ml-3 text-base font-medium transition-colors duration-300",
+                  "ml-3 text-base font-semibold transition-colors duration-300",
                   {
                     "text-red-600": isCurrent,
                     "text-gray-900": isCompleted,

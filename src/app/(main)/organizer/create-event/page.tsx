@@ -1,5 +1,5 @@
 "use client";
-import { EventStepper, Step1 } from "./components";
+import { EventStepper, Step1, Step2 } from "./components";
 import { useState } from "react";
 
 const steps = [
@@ -16,6 +16,8 @@ export default function Page() {
     switch (currentStep) {
       case 1:
         return <Step1 />;
+      case 2:
+        return <Step2 />;
       default:
         return null;
     }
@@ -29,7 +31,7 @@ export default function Page() {
         setCurrentStep={setCurrentStep}
       />
 
-      {renderStep()}
+      <div className="mt-4">{renderStep()}</div>
     </>
   );
 }
