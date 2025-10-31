@@ -256,7 +256,7 @@ export const Step2 = () => {
         {sessions.map((session) => (
           <Card key={session.id}>
             <CardContent>
-              <div className="flex items-center justify-between hover:bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between rounded-lg">
                 <div className="flex flex-col">
                   <span className="font-semibold text-gray-900">
                     {new Date(session.startTime).toLocaleDateString("vi-VN")} -{" "}
@@ -281,7 +281,7 @@ export const Step2 = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:text-red-600"
+                    className="h-8 w-8 hover:text-primary"
                     onClick={() => handleRemoveSession(session.id)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -296,10 +296,7 @@ export const Step2 = () => {
         ))}
       </div>
 
-      <Button
-        onClick={handleOpenDialogForCreate}
-        className="bg-red-600 hover:bg-red-700 text-white"
-      >
+      <Button onClick={handleOpenDialogForCreate}>
         <PlusCircle className="h-5 w-5 mr-2" />
         Tạo suất diễn
       </Button>
