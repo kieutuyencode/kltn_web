@@ -13,6 +13,9 @@ import {
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { postSignUp } from "~/api";
 
 const formSchema = z
   .object({
@@ -36,17 +39,38 @@ type FormDto = z.infer<typeof formSchema>;
 
 type SignUpProps = {
   openSignIn: () => void;
+  openEmailVerification: (email: string) => void;
   close: () => void;
 };
 
-export const SignUp = ({ openSignIn, close }: SignUpProps) => {
+export const SignUp = ({
+  openSignIn,
+  openEmailVerification,
+  close,
+}: SignUpProps) => {
   const form = useForm<FormDto>({
     resolver: zodResolver(formSchema),
   });
 
+  const postSignUpMutation = useMutation({
+    mutationFn: postSignUp,
+  });
+
   const onSubmit = (data: FormDto) => {
-    console.log(data);
-    close();
+    postSignUpMutation.mutate(
+      {
+        email: data.email,
+        fullName: data.fullName,
+        password: data.password,
+      },
+      {
+        onSuccess: (result) => {
+          toast.success(result.message || "Đăng ký thành công!");
+          // Sau khi đăng ký thành công, chuyển sang dialog xác thực email
+          openEmailVerification(data.email);
+        },
+      }
+    );
   };
 
   return (
@@ -136,8 +160,12 @@ export const SignUp = ({ openSignIn, close }: SignUpProps) => {
           />
 
           <Field>
-            <Button type="submit" form="sign-up">
-              Đăng ký
+            <Button
+              type="submit"
+              form="sign-up"
+              disabled={postSignUpMutation.isPending}
+            >
+              {postSignUpMutation.isPending ? "Đang xử lý..." : "Đăng ký"}
             </Button>
           </Field>
 

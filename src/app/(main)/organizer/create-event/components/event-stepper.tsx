@@ -39,7 +39,7 @@ export const EventStepper = ({
                 )}
               >
                 {isCompleted ? (
-                  <Check className="h-5 w-5 md:h-6 md:w-6" />
+                  <Check className="h-4 w-4" />
                 ) : (
                   <span className="text-sm">{stepNumber}</span>
                 )}

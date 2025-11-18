@@ -11,6 +11,9 @@ import {
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { postForgotPassword, postResetPassword } from "~/api";
 
 const requestOTPFormSchema = z.object({
   email: z.email("Email không hợp lệ."),
@@ -28,10 +31,22 @@ export const RequestOTP = ({ onOTPSent, openSignIn }: RequestOTPProps) => {
     resolver: zodResolver(requestOTPFormSchema),
   });
 
-  const onSubmit = (data: RequestOTPFormDto) => {
-    console.log("Gửi mã OTP tới email:", data.email);
+  const postForgotPasswordMutation = useMutation({
+    mutationFn: postForgotPassword,
+  });
 
-    onOTPSent(data.email);
+  const onSubmit = (data: RequestOTPFormDto) => {
+    postForgotPasswordMutation.mutate(
+      { email: data.email },
+      {
+        onSuccess: (result) => {
+          toast.success(
+            result.message || "Mã xác thực đã được gửi đến email của bạn!"
+          );
+          onOTPSent(data.email);
+        },
+      }
+    );
   };
 
   return (
@@ -64,8 +79,14 @@ export const RequestOTP = ({ onOTPSent, openSignIn }: RequestOTPProps) => {
         />
 
         <Field>
-          <Button type="submit" form="request-otp">
-            Gửi mã OTP
+          <Button
+            type="submit"
+            form="request-otp"
+            disabled={postForgotPasswordMutation.isPending}
+          >
+            {postForgotPasswordMutation.isPending
+              ? "Đang gửi..."
+              : "Gửi mã OTP"}
           </Button>
         </Field>
 
@@ -118,15 +139,26 @@ export const VerifyAndResetPassword = ({
     resolver: zodResolver(verifyAndResetPasswordFormSchema),
   });
 
-  const onSubmit = (data: VerifyAndResetPasswordFormDto) => {
-    // Xử lý logic xác thực OTP và cập nhật mật khẩu mới
-    console.log("Email:", email);
-    console.log("OTP:", data.otp);
-    console.log("Mật khẩu mới:", data.password);
+  const postResetPasswordMutation = useMutation({
+    mutationFn: postResetPassword,
+  });
 
-    // Sau khi API xác nhận thành công
-    // alert("Mật khẩu của bạn đã được cập nhật thành công!");
-    openSignIn(); // Chuyển người dùng đến trang đăng nhập
+  const onSubmit = (data: VerifyAndResetPasswordFormDto) => {
+    postResetPasswordMutation.mutate(
+      {
+        email,
+        code: data.otp,
+        password: data.password,
+      },
+      {
+        onSuccess: (result) => {
+          toast.success(
+            result.message || "Mật khẩu của bạn đã được cập nhật thành công!"
+          );
+          openSignIn(); // Chuyển người dùng đến trang đăng nhập
+        },
+      }
+    );
   };
 
   return (
@@ -195,8 +227,14 @@ export const VerifyAndResetPassword = ({
         />
 
         <Field>
-          <Button type="submit" form="verify-reset-password">
-            Xác nhận và Đặt lại mật khẩu
+          <Button
+            type="submit"
+            form="verify-reset-password"
+            disabled={postResetPasswordMutation.isPending}
+          >
+            {postResetPasswordMutation.isPending
+              ? "Đang xử lý..."
+              : "Xác nhận và Đặt lại mật khẩu"}
           </Button>
         </Field>
       </FieldGroup>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Calendar,
   ChevronLeft,
@@ -96,8 +97,8 @@ export const EventCarousel = () => {
                 className="object-cover"
               />
             </div>
-            <Button size="lg" className="w-full">
-              Xem chi tiết
+            <Button size="lg" className="w-full" asChild>
+              <Link href={`/events/${currentEvent.id}`}>Xem chi tiết</Link>
             </Button>
           </div>
 

@@ -13,6 +13,10 @@ import {
 import * as z from "zod";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { postSignIn } from "~/api";
+import { useAuthStore } from "~/stores";
 
 const formSchema = z.object({
   email: z.email("Email không hợp lệ."),
@@ -26,20 +30,31 @@ type FormDto = z.infer<typeof formSchema>;
 type SignInProps = {
   openSignUp: () => void;
   openForgotPassword: () => void;
+  openEmailVerification: () => void;
   close: () => void;
 };
 export const SignIn = ({
   openSignUp,
   openForgotPassword,
+  openEmailVerification,
   close,
 }: SignInProps) => {
+  const authStore = useAuthStore();
   const form = useForm<FormDto>({
     resolver: zodResolver(formSchema),
   });
+  const postSignInMutation = useMutation({
+    mutationFn: postSignIn,
+  });
 
   const onSubmit = (data: FormDto) => {
-    console.log(data);
-    close();
+    postSignInMutation.mutate(data, {
+      onSuccess: (result) => {
+        toast.success(result.message);
+        authStore.setUserAccessToken(result.data.accessToken);
+        close();
+      },
+    });
   };
 
   return (
@@ -89,8 +104,12 @@ export const SignIn = ({
           />
 
           <Field>
-            <Button type="submit" form="sign-in">
-              Đăng nhập
+            <Button
+              type="submit"
+              form="sign-in"
+              disabled={postSignInMutation.isPending}
+            >
+              {postSignInMutation.isPending ? "Đang xử lý..." : "Đăng nhập"}
             </Button>
           </Field>
 
@@ -101,6 +120,15 @@ export const SignIn = ({
                 onClick={openForgotPassword}
               >
                 Quên mật khẩu?
+              </span>
+            </FieldDescription>
+
+            <FieldDescription className="text-center">
+              <span
+                className="underline underline-offset-4 hover:text-foreground cursor-pointer"
+                onClick={openEmailVerification}
+              >
+                Xác thực email
               </span>
             </FieldDescription>
 

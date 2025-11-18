@@ -8,17 +8,26 @@ import {
   LogOut,
   Ticket,
   User,
+  Settings,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Button,
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
   Dialog,
   DialogContent,
-  DialogTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -34,6 +43,20 @@ import {
 import { SignIn } from "./sign-in";
 import { SignUp } from "./sign-up";
 import { RequestOTP, VerifyAndResetPassword } from "./forgot-password";
+import { RequestEmailVerificationOTP, VerifyEmail } from "./email-verification";
+import { useAuthStore } from "~/stores";
+import { useQuery } from "@tanstack/react-query";
+import { getProfile } from "~/api";
+import { getResourceClientUrlWithDefaultAvatar } from "~/utils";
+
+// Danh sách các route cần đăng nhập
+const protectedRoutes = [
+  "/account",
+  "/ticket",
+  "/organizer/create-event",
+  "/organizer/manage",
+  "/organizer/revenue",
+];
 
 const navBar = [
   {
@@ -66,23 +89,32 @@ const navBar = [
     ],
   },
   {
-    title: "Thông tin cá nhân",
+    title: "Tài khoản",
     icon: User,
     url: "/account",
   },
 ];
 
-type AuthFormType = "signIn" | "signUp" | "requestOtp" | "verifyOtp";
+type AuthFormType =
+  | "signIn"
+  | "signUp"
+  | "requestOtp"
+  | "verifyOtp"
+  | "requestEmailVerificationOTP"
+  | "verifyEmail";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Lấy đường dẫn URL hiện tại
   const pathname = usePathname();
+  const router = useRouter();
   // State để quản lý việc mở/đóng Dialog chung
   const [isAuthModalOpen, setAuthModalOpen] = useState(false);
   // State để quyết định form nào sẽ hiển thị
   const [authFormType, setAuthFormType] = useState<AuthFormType>("signIn");
-  // State mới để lưu email giữa các bước
+  // State mới để lưu email giữa các bước (cho reset password)
   const [emailForReset, setEmailForReset] = useState<string>("");
+  // State để lưu email cho xác thực email
+  const [emailForVerification, setEmailForVerification] = useState<string>("");
 
   // Hàm để mở Dialog và đặt loại form
   const openAuthModal = (type: AuthFormType) => {
@@ -95,10 +127,60 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setAuthModalOpen(false);
   };
 
-  // Hàm được gọi sau khi gửi OTP thành công
+  // Hàm được gọi sau khi gửi OTP thành công (cho reset password)
   const handleOTPSent = (sentEmail: string) => {
     setEmailForReset(sentEmail); // Lưu email
     setAuthFormType("verifyOtp"); // Chuyển sang form xác thực
+  };
+
+  // Hàm được gọi sau khi gửi OTP xác thực email thành công
+  const handleEmailVerificationOTPSent = (sentEmail: string) => {
+    setEmailForVerification(sentEmail); // Lưu email
+    setAuthFormType("verifyEmail"); // Chuyển sang form xác thực email
+  };
+
+  // Hàm để mở dialog xác thực email (có thể từ SignIn hoặc SignUp)
+  const handleOpenEmailVerification = (email?: string) => {
+    if (email) {
+      // Nếu có email (từ SignUp), chuyển thẳng sang form nhập OTP
+      setEmailForVerification(email);
+      setAuthFormType("verifyEmail");
+    } else {
+      // Nếu không có email (từ SignIn), hiển thị form nhập email trước
+      setEmailForVerification("");
+      setAuthFormType("requestEmailVerificationOTP");
+    }
+  };
+
+  const authStore = useAuthStore();
+  const isAuthenticated = !!authStore.userAccessToken;
+
+  const getProfileQuery = useQuery({
+    queryKey: getProfile.queryKey,
+    queryFn: getProfile,
+    enabled: isAuthenticated,
+  });
+  const user = getProfileQuery.data?.data;
+
+  // Hàm xử lý navigation với kiểm tra authentication
+  const handleNavigation = (url: string) => {
+    // Kiểm tra xem route có cần đăng nhập không
+    const isProtected = protectedRoutes.some((route) => url.startsWith(route));
+
+    // Nếu route cần đăng nhập và user chưa đăng nhập, mở dialog đăng nhập
+    if (isProtected && !isAuthenticated) {
+      openAuthModal("signIn");
+      return;
+    }
+
+    // Nếu đã đăng nhập hoặc route không cần đăng nhập, điều hướng bình thường
+    router.push(url);
+  };
+
+  // Hàm xử lý đăng xuất
+  const handleSignOut = () => {
+    authStore.setUserAccessToken(null);
+    router.push("/");
   };
 
   const renderAuthForm = () => {
@@ -107,6 +189,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         return (
           <SignUp
             openSignIn={() => setAuthFormType("signIn")}
+            openEmailVerification={handleOpenEmailVerification}
             close={closeAuthModal}
           />
         );
@@ -124,6 +207,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             openSignIn={() => setAuthFormType("signIn")}
           />
         );
+      case "requestEmailVerificationOTP":
+        return (
+          <RequestEmailVerificationOTP
+            onOTPSent={handleEmailVerificationOTPSent}
+            openSignIn={() => setAuthFormType("signIn")}
+          />
+        );
+      case "verifyEmail":
+        return (
+          <VerifyEmail
+            email={emailForVerification} // Sử dụng email đã lưu
+            openSignIn={() => setAuthFormType("signIn")}
+          />
+        );
       case "signIn":
       default:
         return (
@@ -134,6 +231,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               setAuthFormType("requestOtp");
               setEmailForReset("");
             }}
+            // Khi nhấn "Xác thực email", chuyển sang dialog xác thực email
+            openEmailVerification={() => handleOpenEmailVerification()}
             close={closeAuthModal}
           />
         );
@@ -167,10 +266,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       tooltip={item.title}
                       isActive={isActive}
                     >
-                      <a href={item.url}>
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => handleNavigation(item.url)}
+                      >
                         <item.icon />
                         <span>{item.title}</span>
-                      </a>
+                      </div>
                     </SidebarMenuButton>
                     {item.items?.length ? (
                       <>
@@ -192,9 +294,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                     asChild
                                     isActive={isSubItemActive}
                                   >
-                                    <a href={subItem.url}>
+                                    <div
+                                      className="cursor-pointer"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handleNavigation(subItem.url);
+                                      }}
+                                    >
                                       <span>{subItem.title}</span>
-                                    </a>
+                                    </div>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
                               );
@@ -212,23 +320,82 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       <SidebarFooter>
-        <Button variant="outline">
-          <LogOut />
-          Đăng xuất
-        </Button>
+        {isAuthenticated ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 h-auto py-2 px-3"
+              >
+                <Avatar className="size-8">
+                  <AvatarImage
+                    className="object-cover"
+                    src={getResourceClientUrlWithDefaultAvatar(user?.avatar)}
+                    alt={user?.fullName}
+                  />
+                </Avatar>
+                <div className="flex flex-col items-start flex-1 min-w-0">
+                  <span className="font-medium truncate w-full text-left">
+                    {user?.fullName}
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate w-full text-left">
+                    {user?.email}
+                  </span>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-56"
+              side="right"
+              sideOffset={8}
+            >
+              <DropdownMenuLabel>Tài khoản</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  handleNavigation("/account");
+                }}
+              >
+                <User className="mr-2 size-4" />
+                Tài khoản
+              </DropdownMenuItem>
 
-        <Dialog open={isAuthModalOpen} onOpenChange={setAuthModalOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" onClick={() => openAuthModal("signIn")}>
-              <LogIn />
-              Đăng nhập
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            {renderAuthForm()}
-          </DialogContent>
-        </Dialog>
+              {/* <DropdownMenuItem
+                onClick={() => {
+                  router.push("/account");
+                }}
+              >
+                <Settings className="mr-2 size-4" />
+                Cài đặt
+              </DropdownMenuItem> */}
+
+              {/* <DropdownMenuSeparator /> */}
+
+              <DropdownMenuItem onClick={handleSignOut} variant="destructive">
+                <LogOut className="mr-2 size-4" />
+                Đăng xuất
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => openAuthModal("signIn")}
+          >
+            <LogIn className="mr-2 size-4" />
+            Đăng nhập
+          </Button>
+        )}
       </SidebarFooter>
+
+      {/* Dialog luôn sẵn sàng để có thể mở từ bất kỳ đâu */}
+      <Dialog open={isAuthModalOpen} onOpenChange={setAuthModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          {renderAuthForm()}
+        </DialogContent>
+      </Dialog>
     </Sidebar>
   );
 }
