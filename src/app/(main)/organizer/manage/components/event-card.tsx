@@ -2,10 +2,12 @@ import {
   Calendar,
   Edit2,
   MapPin,
-  Ticket,
-  Users,
-  Utensils,
   Trash2,
+  FileText,
+  Settings,
+  CheckSquare,
+  History,
+  PieChart,
 } from "lucide-react";
 
 interface EventCardProps {
@@ -15,10 +17,11 @@ interface EventCardProps {
   time: string;
   location: string;
   address: string;
-  onStats?: () => void;
-  onMembers?: () => void;
+  onManage?: () => void;
+  onSummary?: () => void;
   onOrders?: () => void;
-  onGhost?: () => void;
+  onCheckIn?: () => void;
+  onPaymentHistory?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }
@@ -30,18 +33,20 @@ export const EventCard = ({
   time,
   location,
   address,
-  onStats,
-  onMembers,
+  onManage,
+  onSummary,
   onOrders,
-  onGhost,
+  onCheckIn,
+  onPaymentHistory,
   onEdit,
   onDelete,
 }: EventCardProps) => {
   const actionButtons = [
-    { icon: Ticket, label: "Tổng quan", action: onStats },
-    { icon: Users, label: "Thành viên", action: onMembers },
-    { icon: Ticket, label: "Đơn hàng", action: onOrders },
-    { icon: Utensils, label: "Sơ đồ ghế", action: onGhost },
+    { icon: Settings, label: "Quản trị", action: onManage },
+    { icon: PieChart, label: "Tổng kết", action: onSummary },
+    { icon: FileText, label: "Đơn hàng", action: onOrders },
+    { icon: CheckSquare, label: "Check-in", action: onCheckIn },
+    { icon: History, label: "Thanh toán", action: onPaymentHistory },
     { icon: Edit2, label: "Chỉnh sửa", action: onEdit },
   ];
 
@@ -79,7 +84,7 @@ export const EventCard = ({
           </div>
 
           <div className="border-t border-gray-200 pt-4">
-            <div className="grid grid-cols-6 gap-4">
+            <div className="grid grid-cols-3 md:grid-cols-7 gap-4">
               {actionButtons.map((btn, index) => (
                 <button
                   key={index}

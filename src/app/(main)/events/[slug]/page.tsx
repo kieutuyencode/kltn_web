@@ -29,17 +29,16 @@ import type {
 } from "~/types";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default function EventDetailPage({ params }: PageProps) {
-  const { id } = use(params);
-  const eventId = parseInt(id);
+  const { slug } = use(params);
 
   const eventDetailQuery = useQuery({
-    queryKey: getPublicEventDetail.queryKey(eventId),
-    queryFn: () => getPublicEventDetail(eventId),
-    enabled: !!eventId && !isNaN(eventId),
+    queryKey: getPublicEventDetail.queryKey(slug),
+    queryFn: () => getPublicEventDetail(slug),
+    enabled: !!slug,
   });
 
   // Get related events
@@ -49,6 +48,7 @@ export default function EventDetailPage({ params }: PageProps) {
   });
 
   const event = eventDetailQuery.data?.data;
+  const eventId = event?.id;
   const relatedEvents: TEventWithDetails[] =
     relatedEventsQuery.data?.data?.rows?.filter((e) => e.id !== eventId) || [];
 
@@ -253,7 +253,7 @@ export default function EventDetailPage({ params }: PageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ShowtimeSection showtimes={showtimes} eventId={eventId} />
+                <ShowtimeSection showtimes={showtimes} slug={slug} />
               </CardContent>
             </Card>
           </div>
@@ -330,6 +330,7 @@ export default function EventDetailPage({ params }: PageProps) {
                     key={relatedEvent.id}
                     event={{
                       id: String(relatedEvent.id),
+                      slug: relatedEvent.slug,
                       image: getImageUrl(relatedEvent.image),
                       category: relatedEvent.category?.name || "Chưa phân loại",
                       date: date,

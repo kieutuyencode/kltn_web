@@ -29,3 +29,21 @@ export const generateSlug = (name: string) => {
     .replace(/[^\w-]+/g, "") // Xóa các ký tự không hợp lệ
     .replace(/--+/g, "-"); // Thay thế nhiều dấu gạch ngang liên tiếp
 };
+
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+export const formatTime = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};

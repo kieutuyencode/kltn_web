@@ -1,4 +1,4 @@
-import type { TUser } from './user.type';
+import type { TUser } from "./user.type";
 
 export type TEventCategory = {
   id: number;
@@ -119,6 +119,12 @@ export type TGetPublicEventDto = {
   page?: number;
 };
 
+export type TGetMyTicketDto = {
+  isRedeemed?: "1" | "0";
+  limit?: number;
+  page?: number;
+};
+
 export type TEventWithDetails = TEvent & {
   schedule?: TEventSchedule | null;
   ticketType?: TEventTicketType | null;
@@ -129,4 +135,56 @@ export type TEventDetail = TEvent & {
     ticketTypes?: TEventTicketType[];
   })[];
   user?: TUser;
+};
+
+export type TUserTicket = {
+  id: number;
+  walletAddress: string;
+  isRedeemed: boolean;
+  ticketTypeId: number;
+  scheduleId: number;
+  eventId: number;
+  userId: number;
+  _ticketId: number;
+  createdAt: string;
+  updatedAt: string;
+  ticketType?: TEventTicketType;
+  schedule?: TEventSchedule;
+  event?: TEvent;
+  user?: TUser;
+};
+
+export type TPaymentTicketStatus = {
+  id: number;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TPaymentTicket = {
+  id: number;
+  walletAddress: string;
+  paymentTxhash: string;
+  mintTxhash?: string | null;
+  tokenAmount: string; // Decimal as string
+  ticketQuantity: number;
+  ticketTypeId?: number | null;
+  scheduleId?: number | null;
+  eventId?: number | null;
+  statusId?: number | null;
+  userId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  ticketType?: TEventTicketType;
+  schedule?: TEventSchedule;
+  event?: TEvent;
+  status?: TPaymentTicketStatus;
+  user?: TUser;
+};
+
+export type TGetMyPaymentTicketDto = {
+  statusId?: number;
+  limit?: number;
+  page?: number;
 };

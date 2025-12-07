@@ -6,7 +6,7 @@ import { defineChain } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
 import { Env } from "~/constants";
 
-const bscTestnet = defineChain({
+export const bscTestnet = defineChain({
   id: 97,
   caipNetworkId: "eip155:97",
   chainNamespace: "eip155",
@@ -29,10 +29,33 @@ const bscTestnet = defineChain({
   },
 });
 
+export const sepoliaTestnet = defineChain({
+  id: 11155111,
+  caipNetworkId: "eip155:11155111",
+  chainNamespace: "eip155",
+  name: "Sepolia Testnet",
+  nativeCurrency: {
+    decimals: 18,
+    name: "Ether",
+    symbol: "ETH",
+  },
+  rpcUrls: {
+    default: {
+      http: ["https://1rpc.io/sepolia"],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: "Etherscan",
+      url: "https://sepolia.etherscan.io",
+    },
+  },
+});
+
 createAppKit({
   adapters: [new EthersAdapter()],
-  networks: [bscTestnet],
-  defaultNetwork: bscTestnet,
+  networks: [sepoliaTestnet],
+  defaultNetwork: sepoliaTestnet,
   projectId: Env.NEXT_PUBLIC_REOWN_PROJECT_ID,
   features: {
     socials: false,

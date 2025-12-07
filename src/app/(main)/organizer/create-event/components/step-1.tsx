@@ -189,7 +189,13 @@ export const Step1 = ({ eventId, onNext }: Step1Props) => {
     mutationFn: postCreateEvent,
     onSuccess: (result) => {
       toast.success(result.message || "Tạo sự kiện thành công!");
-      queryClient.invalidateQueries({ queryKey: getMyEvent.queryKey() });
+      // Invalidate all event queries to refresh the list
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return Array.isArray(key) && key.length > 0 && key[0] === "events";
+        },
+      });
       if (onNext && result.data?.id) {
         onNext(result.data.id);
       }
@@ -200,10 +206,17 @@ export const Step1 = ({ eventId, onNext }: Step1Props) => {
   const updateEventMutation = useMutation({
     mutationFn: ({ eventId, data }: { eventId: number; data: any }) =>
       patchUpdateEvent(eventId, data),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       toast.success(result.message || "Cập nhật sự kiện thành công!");
-      queryClient.invalidateQueries({ queryKey: getMyEvent.queryKey() });
-      queryClient.invalidateQueries({
+      // Invalidate and refetch all event queries to refresh the list
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return Array.isArray(key) && key.length > 0 && key[0] === "events";
+        },
+      });
+      // Refetch event detail query immediately to update the form
+      await queryClient.refetchQueries({
         queryKey: getEventDetail.queryKey(eventId!),
       });
       if (onNext) {

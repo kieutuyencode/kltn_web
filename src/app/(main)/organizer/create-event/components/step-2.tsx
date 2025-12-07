@@ -25,6 +25,16 @@ import {
   DialogFooter,
   DialogDescription,
 } from "~/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Pencil, PlusCircle, Ticket, Trash2 } from "lucide-react";
 import {
   postCreateSchedule,
@@ -113,11 +123,13 @@ type TicketFormData = z.infer<typeof ticketFormSchema>;
 const TicketFormContent = ({
   ticket,
   scheduleId,
+  eventId,
   onSave,
   onCancel,
 }: {
   ticket: TicketFormData | null;
   scheduleId: number;
+  eventId: number;
   onSave: () => void;
   onCancel: () => void;
 }) => {
@@ -169,9 +181,32 @@ const TicketFormContent = ({
 
   const createTicketMutation = useMutation({
     mutationFn: postCreateTicketType,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: getMySchedule.queryKey(scheduleId),
+    onSuccess: async () => {
+      // Invalidate and refetch all queries for this event
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
+      });
+      // Refetch immediately
+      await queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
       });
       toast.success("Tạo loại vé thành công!");
       onSave();
@@ -181,9 +216,32 @@ const TicketFormContent = ({
   const updateTicketMutation = useMutation({
     mutationFn: ({ ticketId, data }: { ticketId: number; data: any }) =>
       putUpdateTicketType(ticketId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: getMySchedule.queryKey(scheduleId),
+    onSuccess: async () => {
+      // Invalidate and refetch all queries for this event
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
+      });
+      // Refetch immediately
+      await queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
       });
       toast.success("Cập nhật loại vé thành công!");
       onSave();
@@ -418,9 +476,32 @@ const SessionFormContent = ({
 
   const createScheduleMutation = useMutation({
     mutationFn: postCreateSchedule,
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({
-        queryKey: getMySchedule.queryKey(eventId),
+    onSuccess: async (result) => {
+      // Invalidate and refetch schedule query and sessions with tickets query
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
+      });
+      // Refetch immediately
+      await queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
       });
       return result.data.id;
     },
@@ -429,9 +510,32 @@ const SessionFormContent = ({
   const updateScheduleMutation = useMutation({
     mutationFn: ({ scheduleId, data }: { scheduleId: number; data: any }) =>
       putUpdateSchedule(scheduleId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: getMySchedule.queryKey(eventId),
+    onSuccess: async () => {
+      // Invalidate and refetch schedule query and sessions with tickets query
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
+      });
+      // Refetch immediately
+      await queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
       });
     },
   });
@@ -583,6 +687,11 @@ export const Step2 = ({ eventId }: Step2Props) => {
   const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(
     null
   );
+  const [deleteScheduleDialogOpen, setDeleteScheduleDialogOpen] =
+    useState(false);
+  const [scheduleToDelete, setScheduleToDelete] = useState<number | null>(null);
+  const [deleteTicketDialogOpen, setDeleteTicketDialogOpen] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState<number | null>(null);
 
   // Query schedules
   const schedulesQuery = useQuery({
@@ -625,11 +734,36 @@ export const Step2 = ({ eventId }: Step2Props) => {
 
   const deleteScheduleMutation = useMutation({
     mutationFn: deleteSchedule,
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       toast.success(result.message || "Xóa suất diễn thành công!");
-      queryClient.invalidateQueries({
-        queryKey: getMySchedule.queryKey(eventId!),
+      // Invalidate and refetch schedule query and sessions with tickets query
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
       });
+      // Refetch immediately
+      await queryClient.refetchQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          return (
+            Array.isArray(key) &&
+            key.length > 0 &&
+            key[0] === "events" &&
+            typeof key[1] === "number" &&
+            key[1] === eventId
+          );
+        },
+      });
+      setDeleteScheduleDialogOpen(false);
+      setScheduleToDelete(null);
     },
   });
 
@@ -653,27 +787,55 @@ export const Step2 = ({ eventId }: Step2Props) => {
     setTimeout(() => setEditingSession(null), 300);
   };
 
-  const handleSaveSession = () => {
+  const handleSaveSession = async () => {
     handleCloseDialog();
-    queryClient.invalidateQueries({
-      queryKey: getMySchedule.queryKey(eventId!),
+    // Invalidate and refetch all queries for this event
+    await queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          Array.isArray(key) &&
+          key.length > 0 &&
+          key[0] === "events" &&
+          typeof key[1] === "number" &&
+          key[1] === eventId
+        );
+      },
+    });
+    // Refetch immediately
+    await queryClient.refetchQueries({
+      predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          Array.isArray(key) &&
+          key.length > 0 &&
+          key[0] === "events" &&
+          typeof key[1] === "number" &&
+          key[1] === eventId
+        );
+      },
     });
   };
 
   const handleRemoveSession = async (scheduleId: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa suất diễn này?")) {
-      return;
-    }
-    deleteScheduleMutation.mutate(scheduleId);
+    setScheduleToDelete(scheduleId);
+    setDeleteScheduleDialogOpen(true);
   };
 
   const deleteTicketMutation = useMutation({
     mutationFn: deleteTicketType,
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       toast.success(result.message || "Xóa loại vé thành công!");
-      queryClient.invalidateQueries({
+      // Invalidate and refetch schedule query to refresh sessionsWithTickets
+      await queryClient.invalidateQueries({
         queryKey: getMySchedule.queryKey(eventId!),
       });
+      // Refetch immediately - this will also trigger sessionsWithTickets to refetch
+      await queryClient.refetchQueries({
+        queryKey: getMySchedule.queryKey(eventId!),
+      });
+      setDeleteTicketDialogOpen(false);
+      setTicketToDelete(null);
     },
   });
 
@@ -700,18 +862,39 @@ export const Step2 = ({ eventId }: Step2Props) => {
     }, 300);
   };
 
-  const handleSaveTicket = () => {
+  const handleSaveTicket = async () => {
     handleCloseTicketDialog();
-    queryClient.invalidateQueries({
-      queryKey: getMySchedule.queryKey(eventId!),
+    // Invalidate and refetch all queries for this event
+    await queryClient.invalidateQueries({
+      predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          Array.isArray(key) &&
+          key.length > 0 &&
+          key[0] === "events" &&
+          typeof key[1] === "number" &&
+          key[1] === eventId
+        );
+      },
+    });
+    // Refetch immediately
+    await queryClient.refetchQueries({
+      predicate: (query) => {
+        const key = query.queryKey;
+        return (
+          Array.isArray(key) &&
+          key.length > 0 &&
+          key[0] === "events" &&
+          typeof key[1] === "number" &&
+          key[1] === eventId
+        );
+      },
     });
   };
 
   const handleRemoveTicket = async (ticketId: number) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa loại vé này?")) {
-      return;
-    }
-    deleteTicketMutation.mutate(ticketId);
+    setTicketToDelete(ticketId);
+    setDeleteTicketDialogOpen(true);
   };
 
   if (!eventId) {
@@ -904,16 +1087,91 @@ export const Step2 = ({ eventId }: Step2Props) => {
       {/* --- Dialog để Tạo/Sửa Vé --- */}
       <Dialog open={isTicketDialogOpen} onOpenChange={setIsTicketDialogOpen}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh]">
-          {isTicketDialogOpen && currentScheduleId && (
+          {isTicketDialogOpen && currentScheduleId && eventId && (
             <TicketFormContent
               ticket={editingTicket}
               scheduleId={currentScheduleId}
+              eventId={eventId}
               onSave={handleSaveTicket}
               onCancel={handleCloseTicketDialog}
             />
           )}
         </DialogContent>
       </Dialog>
+
+      {/* --- AlertDialog để Xác nhận Xóa Suất diễn --- */}
+      <AlertDialog
+        open={deleteScheduleDialogOpen}
+        onOpenChange={setDeleteScheduleDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa suất diễn</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa suất diễn này? Hành động này không thể
+              hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteScheduleDialogOpen(false);
+                setScheduleToDelete(null);
+              }}
+            >
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (scheduleToDelete) {
+                  deleteScheduleMutation.mutate(scheduleToDelete);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteScheduleMutation.isPending}
+            >
+              {deleteScheduleMutation.isPending ? "Đang xóa..." : "Xóa"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* --- AlertDialog để Xác nhận Xóa Loại vé --- */}
+      <AlertDialog
+        open={deleteTicketDialogOpen}
+        onOpenChange={setDeleteTicketDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận xóa loại vé</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa loại vé này? Hành động này không thể
+              hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteTicketDialogOpen(false);
+                setTicketToDelete(null);
+              }}
+            >
+              Hủy
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (ticketToDelete) {
+                  deleteTicketMutation.mutate(ticketToDelete);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteTicketMutation.isPending}
+            >
+              {deleteTicketMutation.isPending ? "Đang xóa..." : "Xóa"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

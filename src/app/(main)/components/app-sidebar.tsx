@@ -9,6 +9,7 @@ import {
   Ticket,
   User,
   Settings,
+  CreditCard,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
@@ -53,9 +54,10 @@ import { getResourceClientUrlWithDefaultAvatar } from "~/utils";
 const protectedRoutes = [
   "/account",
   "/ticket",
+  "/ticket/payment-history",
   "/organizer/create-event",
   "/organizer/manage",
-  "/organizer/revenue",
+  "/organizer/payment-history",
 ];
 
 const navBar = [
@@ -65,9 +67,19 @@ const navBar = [
     url: "/",
   },
   {
-    title: "Lịch sử đặt vé",
+    title: "Vé của tôi",
     icon: Ticket,
     url: "/ticket",
+    items: [
+      {
+        title: "Vé của tôi",
+        url: "/ticket",
+      },
+      {
+        title: "Lịch sử thanh toán",
+        url: "/ticket/payment-history",
+      },
+    ],
   },
   {
     title: "Tổ chức sự kiện",
@@ -83,8 +95,8 @@ const navBar = [
         url: "/organizer/manage",
       },
       {
-        title: "Quản lý doanh thu",
-        url: "/organizer/revenue",
+        title: "Lịch sử thanh toán",
+        url: "/organizer/payment-history",
       },
     ],
   },

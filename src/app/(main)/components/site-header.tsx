@@ -93,7 +93,44 @@ export function SiteHeader() {
       return;
     }
 
-    const chainId = "0x61"; // BSC Testnet chain ID in hex
+    // const chainId = "0x61"; // BSC Testnet chain ID in hex
+
+    // try {
+    //   // Try to switch to the chain
+    //   await ethereum.request({
+    //     method: "wallet_switchEthereumChain",
+    //     params: [{ chainId }],
+    //   });
+    // } catch (switchError: any) {
+    //   // This error code indicates that the chain has not been added to MetaMask
+    //   if (switchError.code === 4902) {
+    //     try {
+    //       // Add the chain
+    //       await ethereum.request({
+    //         method: "wallet_addEthereumChain",
+    //         params: [
+    //           {
+    //             chainId,
+    //             chainName: "BNB Smart Chain Testnet",
+    //             nativeCurrency: {
+    //               name: "Binance Chain Native Token",
+    //               symbol: "tBNB",
+    //               decimals: 18,
+    //             },
+    //             rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545"],
+    //             blockExplorerUrls: ["https://testnet.bscscan.com"],
+    //           },
+    //         ],
+    //       });
+    //     } catch (addError) {
+    //       console.error("Error adding chain:", addError);
+    //     }
+    //   } else {
+    //     console.error("Error switching chain:", switchError);
+    //   }
+    // }
+
+    const chainId = "0xaa36a7"; // Sepolia Testnet chain ID in hex
 
     try {
       // Try to switch to the chain
@@ -111,14 +148,14 @@ export function SiteHeader() {
             params: [
               {
                 chainId,
-                chainName: "BNB Smart Chain Testnet",
+                chainName: "Sepolia Testnet",
                 nativeCurrency: {
-                  name: "Binance Chain Native Token",
-                  symbol: "tBNB",
+                  name: "Ether",
+                  symbol: "ETH",
                   decimals: 18,
                 },
-                rpcUrls: ["https://data-seed-prebsc-1-s1.binance.org:8545"],
-                blockExplorerUrls: ["https://testnet.bscscan.com"],
+                rpcUrls: ["https://1rpc.io/sepolia"],
+                blockExplorerUrls: ["https://sepolia.etherscan.io"],
               },
             ],
           });

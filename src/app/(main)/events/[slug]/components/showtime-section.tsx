@@ -42,10 +42,10 @@ interface Showtime {
 
 interface ShowtimeSectionProps {
   showtimes: Showtime[];
-  eventId: number;
+  slug: string;
 }
 
-export function ShowtimeSection({ showtimes, eventId }: ShowtimeSectionProps) {
+export function ShowtimeSection({ showtimes, slug }: ShowtimeSectionProps) {
   const queryClient = useQueryClient();
   const { address, isConnected } = useAppKitAccount();
   const { walletProvider } = useAppKitProvider("eip155");
@@ -146,7 +146,7 @@ export function ShowtimeSection({ showtimes, eventId }: ShowtimeSectionProps) {
 
           // Invalidate query to refresh event data and update ticket quantities
           queryClient.invalidateQueries({
-            queryKey: getPublicEventDetail.queryKey(eventId),
+            queryKey: getPublicEventDetail.queryKey(slug),
           });
         } catch (apiError: any) {
           console.error("Error calling buy ticket API:", apiError);
@@ -159,15 +159,9 @@ export function ShowtimeSection({ showtimes, eventId }: ShowtimeSectionProps) {
       } else {
         toast.success("Mua vé thành công!");
       }
-
-      // Reset quantity
-      setQuantities((prev) => ({
-        ...prev,
-        [ticketTypeId]: 1,
-      }));
     } catch (error: any) {
       console.error("Error buying ticket:", error);
-      if (error.code === 4001) {
+      if (error?.info?.error?.code === 4001) {
         toast.error("Giao dịch bị từ chối");
       } else {
         toast.error(error?.message || "Có lỗi xảy ra khi mua vé");

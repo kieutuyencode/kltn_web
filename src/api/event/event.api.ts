@@ -11,8 +11,15 @@ import {
   TUpdateTicketTypeDto,
   TGetMyEventDto,
   TGetPublicEventDto,
+  TGetMyTicketDto,
+  TGetMyPaymentTicketDto,
   TEventWithDetails,
   TEventDetail,
+  TUserTicket,
+  TPaymentTicket,
+  TPaymentTicketStatus,
+  TEventCategory,
+  TEventStatus,
 } from "~/types/event.type";
 import { axiosAPI } from "~/utils";
 
@@ -168,15 +175,15 @@ getPublicEvent.queryKey = (params?: TGetPublicEventDto) => [
 // Get Public Event Detail
 type TGetPublicEventDetailResponse = TResponse<TEventDetail>;
 export const getPublicEventDetail = async (
-  eventId: number
+  slug: string
 ): Promise<TGetPublicEventDetailResponse> => {
-  const response = await axiosAPI.get(`/event/public/${eventId}`);
+  const response = await axiosAPI.get(`/event/public/${slug}`);
   return response.data;
 };
-getPublicEventDetail.queryKey = (eventId: number) => [
+getPublicEventDetail.queryKey = (slug: string) => [
   "events",
   "public",
-  eventId,
+  slug,
 ];
 
 // Buy Ticket
@@ -187,3 +194,91 @@ export const postBuyTicket = async (body: {
   const response = await axiosAPI.post("/event/buy-ticket", body);
   return response.data;
 };
+
+// Get My Tickets
+type TGetMyTicketResponse = TResponsePagination<TUserTicket[]>;
+export const getMyTicket = async (
+  params?: TGetMyTicketDto
+): Promise<TGetMyTicketResponse> => {
+  const response = await axiosAPI.get("/event/ticket", { params });
+  return response.data;
+};
+getMyTicket.queryKey = (params?: TGetMyTicketDto) => [
+  "events",
+  "ticket",
+  "my",
+  params,
+];
+
+// Get Event Categories
+type TGetEventCategoryResponse = TResponse<TEventCategory[]>;
+export const getEventCategory = async (): Promise<TGetEventCategoryResponse> => {
+  const response = await axiosAPI.get("/event/category");
+  return response.data;
+};
+getEventCategory.queryKey = () => ["events", "category"];
+
+// Get Event Statuses
+type TGetEventStatusResponse = TResponse<TEventStatus[]>;
+export const getEventStatus = async (): Promise<TGetEventStatusResponse> => {
+  const response = await axiosAPI.get("/event/status");
+  return response.data;
+};
+getEventStatus.queryKey = () => ["events", "status"];
+
+// Get My Ticket Detail
+type TGetMyTicketDetailResponse = TResponse<TUserTicket>;
+export const getMyTicketDetail = async (
+  ticketId: number
+): Promise<TGetMyTicketDetailResponse> => {
+  const response = await axiosAPI.get(`/event/ticket/${ticketId}`);
+  return response.data;
+};
+getMyTicketDetail.queryKey = (ticketId: number) => [
+  "events",
+  "ticket",
+  ticketId,
+];
+
+// Get Ticket QR Code
+type TGetTicketQrCodeResponse = TResponse<string>;
+export const getTicketQrCode = async (
+  ticketId: number
+): Promise<TGetTicketQrCodeResponse> => {
+  const response = await axiosAPI.get(`/event/ticket/${ticketId}/qr-code`);
+  return response.data;
+};
+
+// Transfer Ticket
+type TPostTransferTicketResponse = TResponse;
+export const postTransferTicket = async (body: {
+  ticketId: number;
+  email: string;
+  txhash: string;
+}): Promise<TPostTransferTicketResponse> => {
+  const response = await axiosAPI.post("/event/transfer-ticket", body);
+  return response.data;
+};
+
+// Get Payment Ticket Statuses
+type TGetPaymentTicketStatusResponse = TResponse<TPaymentTicketStatus[]>;
+export const getPaymentTicketStatus = async (): Promise<TGetPaymentTicketStatusResponse> => {
+  const response = await axiosAPI.get("/event/payment-ticket-status");
+  return response.data;
+};
+getPaymentTicketStatus.queryKey = () => ["events", "payment-ticket-status"];
+
+// Get My Payment Tickets
+type TGetMyPaymentTicketResponse = TResponsePagination<TPaymentTicket[]>;
+export const getMyPaymentTicket = async (
+  params?: TGetMyPaymentTicketDto
+): Promise<TGetMyPaymentTicketResponse> => {
+  const response = await axiosAPI.get("/event/payment-ticket", { params });
+  return response.data;
+};
+getMyPaymentTicket.queryKey = (params?: TGetMyPaymentTicketDto) => [
+  "events",
+  "payment-ticket",
+  "my",
+  params,
+];

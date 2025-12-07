@@ -1,8 +1,8 @@
 export const EVENT_CONTRACT_ADDRESS =
-  "0x7f45acF63c3Dd2c77Ca3228C6335f627C48834c7";
+  "0x57Ee139222F451180F0621d915f416E5f2143EBa";
 
 export const TOKEN_CONTRACT_ADDRESS =
-  "0xAbf101fbC1de8dab151b109cF1C6D7C5b99ba01B";
+  "0x19fee37fDF4Ce8838D9Bc46471b6FCbe712A1605";
 
 export const EVENT_CONTRACT_ABI = [
   {
@@ -476,6 +476,27 @@ export const EVENT_CONTRACT_ABI = [
       {
         indexed: true,
         internalType: "uint256",
+        name: "ticketId",
+        type: "uint256",
+      },
+      { indexed: true, internalType: "address", name: "from", type: "address" },
+      { indexed: true, internalType: "address", name: "to", type: "address" },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    name: "TicketTransferred",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "uint256",
         name: "ticketTypeId",
         type: "uint256",
       },
@@ -662,16 +683,9 @@ export const EVENT_CONTRACT_ABI = [
     type: "function",
   },
   {
-    inputs: [{ internalType: "address", name: "organizer", type: "address" }],
+    inputs: [{ internalType: "uint256", name: "scheduleId", type: "uint256" }],
     name: "getOrganizerSchedule",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getOrganizers",
-    outputs: [{ internalType: "address[]", name: "", type: "address[]" }],
+    outputs: [{ internalType: "address", name: "", type: "address" }],
     stateMutability: "view",
     type: "function",
   },
@@ -922,6 +936,16 @@ export const EVENT_CONTRACT_ABI = [
   {
     inputs: [{ internalType: "address", name: "newOwner", type: "address" }],
     name: "transferOwnership",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      { internalType: "uint256", name: "ticketId", type: "uint256" },
+      { internalType: "address", name: "to", type: "address" },
+    ],
+    name: "transferTicket",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

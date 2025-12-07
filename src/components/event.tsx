@@ -5,6 +5,7 @@ import { formatPrice } from "~/utils";
 
 type TEvent = {
   id: string;
+  slug: string;
   image: string;
   category: string;
   date: string;
@@ -17,7 +18,7 @@ export const EventCard = ({ event }: { event: TEvent }) => {
   const minPrice = event.minPrice ?? 500000;
 
   return (
-    <Link href={`/events/${event.id}`} className="h-full">
+    <Link href={`/events/${event.slug}`} className="h-full">
       <Card className="h-full flex flex-col overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group py-0 gap-0">
         <div className="relative w-full aspect-video overflow-hidden bg-muted shrink-0">
           <Image
