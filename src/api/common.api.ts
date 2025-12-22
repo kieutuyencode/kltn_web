@@ -18,3 +18,16 @@ export const postUploadFile = async (
 
   return response.data;
 };
+
+// Get Client Config
+type TClientConfig = {
+  VERIFY_EMAIL_CODE_EXPIRES_IN_MINUTES?: string;
+  RESET_PASSWORD_CODE_EXPIRES_IN_MINUTES?: string;
+  SELL_TICKET_FEE_RATE?: string;
+};
+type TGetClientConfigResponse = TResponse<TClientConfig>;
+export const getClientConfig = async (): Promise<TGetClientConfigResponse> => {
+  const response = await axiosAPI.get("/config");
+  return response.data;
+};
+getClientConfig.queryKey = () => ["config", "client"];

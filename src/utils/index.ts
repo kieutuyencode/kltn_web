@@ -30,6 +30,7 @@ export const generateSlug = (name: string) => {
     .replace(/--+/g, "-"); // Thay thế nhiều dấu gạch ngang liên tiếp
 };
 
+// Format date with weekday (e.g., "Thứ Hai, 21 tháng 12 năm 2024")
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("vi-VN", {
@@ -40,10 +41,36 @@ export const formatDate = (dateString: string) => {
   });
 };
 
+// Format date short numeric (e.g., "21/12/2024")
+export const formatDateShort = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+  });
+};
+
+// Format date only without weekday (e.g., "21 tháng 12 năm 2024")
+export const formatDateOnly = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("vi-VN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+// Format time (e.g., "14:00")
 export const formatTime = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleTimeString("vi-VN", {
     hour: "2-digit",
     minute: "2-digit",
   });
+};
+
+// Format date and time short (e.g., "14:00, 21/12/2024")
+export const formatDateTime = (dateString: string) => {
+  return `${formatTime(dateString)}, ${formatDateShort(dateString)}`;
 };

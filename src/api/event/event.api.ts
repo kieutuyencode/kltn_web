@@ -13,6 +13,7 @@ import {
   TGetPublicEventDto,
   TGetMyTicketDto,
   TGetMyPaymentTicketDto,
+  TGetOrganizerPaymentTicketDto,
   TEventWithDetails,
   TEventDetail,
   TUserTicket,
@@ -20,6 +21,13 @@ import {
   TPaymentTicketStatus,
   TEventCategory,
   TEventStatus,
+  TPaymentOrganizer,
+  TPaymentOrganizerStatus,
+  TGetMyPaymentOrganizerDto,
+  TRequestSchedulePayoutDto,
+  TCheckInStatistics,
+  TRevenueStatistics,
+  TGetRevenueStatisticsDto,
 } from "~/types/event.type";
 import { axiosAPI } from "~/utils";
 
@@ -180,11 +188,7 @@ export const getPublicEventDetail = async (
   const response = await axiosAPI.get(`/event/public/${slug}`);
   return response.data;
 };
-getPublicEventDetail.queryKey = (slug: string) => [
-  "events",
-  "public",
-  slug,
-];
+getPublicEventDetail.queryKey = (slug: string) => ["events", "public", slug];
 
 // Buy Ticket
 type TPostBuyTicketResponse = TResponse;
@@ -212,10 +216,11 @@ getMyTicket.queryKey = (params?: TGetMyTicketDto) => [
 
 // Get Event Categories
 type TGetEventCategoryResponse = TResponse<TEventCategory[]>;
-export const getEventCategory = async (): Promise<TGetEventCategoryResponse> => {
-  const response = await axiosAPI.get("/event/category");
-  return response.data;
-};
+export const getEventCategory =
+  async (): Promise<TGetEventCategoryResponse> => {
+    const response = await axiosAPI.get("/event/category");
+    return response.data;
+  };
 getEventCategory.queryKey = () => ["events", "category"];
 
 // Get Event Statuses
@@ -262,10 +267,11 @@ export const postTransferTicket = async (body: {
 
 // Get Payment Ticket Statuses
 type TGetPaymentTicketStatusResponse = TResponse<TPaymentTicketStatus[]>;
-export const getPaymentTicketStatus = async (): Promise<TGetPaymentTicketStatusResponse> => {
-  const response = await axiosAPI.get("/event/payment-ticket-status");
-  return response.data;
-};
+export const getPaymentTicketStatus =
+  async (): Promise<TGetPaymentTicketStatusResponse> => {
+    const response = await axiosAPI.get("/event/payment-ticket-status");
+    return response.data;
+  };
 getPaymentTicketStatus.queryKey = () => ["events", "payment-ticket-status"];
 
 // Get My Payment Tickets
@@ -281,4 +287,114 @@ getMyPaymentTicket.queryKey = (params?: TGetMyPaymentTicketDto) => [
   "payment-ticket",
   "my",
   params,
+];
+
+// Get Payment Organizer Statuses
+type TGetPaymentOrganizerStatusResponse = TResponse<TPaymentOrganizerStatus[]>;
+export const getPaymentOrganizerStatus =
+  async (): Promise<TGetPaymentOrganizerStatusResponse> => {
+    const response = await axiosAPI.get("/event/payment-organizer-status");
+    return response.data;
+  };
+getPaymentOrganizerStatus.queryKey = () => [
+  "events",
+  "payment-organizer-status",
+];
+
+// Request Schedule Payout
+type TPostRequestSchedulePayoutResponse = TResponse<TPaymentOrganizer>;
+export const postRequestSchedulePayout = async (
+  body: TRequestSchedulePayoutDto
+): Promise<TPostRequestSchedulePayoutResponse> => {
+  const response = await axiosAPI.post("/event/request-schedule-payout", body);
+  return response.data;
+};
+
+// Get My Payment Organizer
+type TGetMyPaymentOrganizerResponse = TResponsePagination<TPaymentOrganizer[]>;
+export const getMyPaymentOrganizer = async (
+  params?: TGetMyPaymentOrganizerDto
+): Promise<TGetMyPaymentOrganizerResponse> => {
+  const response = await axiosAPI.get("/event/payment-organizer", { params });
+  return response.data;
+};
+getMyPaymentOrganizer.queryKey = (params?: TGetMyPaymentOrganizerDto) => [
+  "events",
+  "payment-organizer",
+  "my",
+  params,
+];
+
+// Get My Payment Organizer By Schedule
+type TGetMyPaymentOrganizerByScheduleResponse =
+  TResponse<TPaymentOrganizer | null>;
+export const getMyPaymentOrganizerBySchedule = async (
+  scheduleId: number
+): Promise<TGetMyPaymentOrganizerByScheduleResponse> => {
+  const response = await axiosAPI.get(
+    `/event/schedule/${scheduleId}/payment-organizer`
+  );
+  return response.data;
+};
+getMyPaymentOrganizerBySchedule.queryKey = (scheduleId: number) => [
+  "events",
+  "schedule",
+  scheduleId,
+  "payment-organizer",
+];
+
+// Get Organizer Payment Tickets
+type TGetOrganizerPaymentTicketResponse = TResponsePagination<TPaymentTicket[]>;
+export const getOrganizerPaymentTicket = async (
+  params?: TGetOrganizerPaymentTicketDto
+): Promise<TGetOrganizerPaymentTicketResponse> => {
+  const response = await axiosAPI.get("/event/organizer/payment-ticket", {
+    params,
+  });
+  return response.data;
+};
+getOrganizerPaymentTicket.queryKey = (
+  params?: TGetOrganizerPaymentTicketDto
+) => ["events", "organizer", "payment-ticket", params];
+
+// Get Check-in Statistics
+type TGetCheckInStatisticsResponse = TResponse<TCheckInStatistics>;
+export const getCheckInStatistics = async (
+  scheduleId: number
+): Promise<TGetCheckInStatisticsResponse> => {
+  const response = await axiosAPI.get("/event/check-in-statistics", {
+    params: { scheduleId },
+  });
+  return response.data;
+};
+getCheckInStatistics.queryKey = (scheduleId: number) => [
+  "events",
+  "check-in-statistics",
+  scheduleId,
+];
+
+// Redeem Ticket
+type TPostRedeemTicketResponse = TResponse<TUserTicket>;
+export const postRedeemTicket = async (body: {
+  encodedQrCode: string;
+}): Promise<TPostRedeemTicketResponse> => {
+  const response = await axiosAPI.post("/event/redeem-ticket", body);
+  return response.data;
+};
+
+// Get Revenue Statistics
+type TGetRevenueStatisticsResponse = TResponse<TRevenueStatistics>;
+export const getRevenueStatistics = async (
+  params: TGetRevenueStatisticsDto
+): Promise<TGetRevenueStatisticsResponse> => {
+  const response = await axiosAPI.get("/event/revenue-statistics", {
+    params,
+  });
+  return response.data;
+};
+getRevenueStatistics.queryKey = (params: TGetRevenueStatisticsDto) => [
+  "events",
+  "revenue-statistics",
+  params.scheduleId,
+  params.period,
 ];

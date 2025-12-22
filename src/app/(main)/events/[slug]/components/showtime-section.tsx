@@ -15,7 +15,7 @@ import {
   AccordionContent,
   Input,
 } from "~/components";
-import { formatPrice, toUnits } from "~/utils";
+import { formatPrice, toUnits, formatDateOnly, formatTime } from "~/utils";
 import {
   EVENT_CONTRACT_ADDRESS,
   EVENT_CONTRACT_ABI,
@@ -37,6 +37,8 @@ interface Showtime {
   scheduleId: number;
   time: string;
   date: string;
+  startDate: string;
+  endDate: string;
   tickets: Ticket[];
 }
 
@@ -44,6 +46,31 @@ interface ShowtimeSectionProps {
   showtimes: Showtime[];
   slug: string;
 }
+
+// Helper function to format date and time range
+const formatDateTimeRange = (startDate: string, endDate: string): string => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Check if same day
+  const isSameDay =
+    start.getDate() === end.getDate() &&
+    start.getMonth() === end.getMonth() &&
+    start.getFullYear() === end.getFullYear();
+
+  const startTime = formatTime(startDate);
+  const endTime = formatTime(endDate);
+
+  if (isSameDay) {
+    // Same day: "giờ:phút - giờ:phút, ngày"
+    return `${startTime} - ${endTime}, ${formatDateOnly(startDate)}`;
+  } else {
+    // Different days: "giờ:phút, ngày - giờ:phút, ngày"
+    return `${startTime}, ${formatDateOnly(
+      startDate
+    )} - ${endTime}, ${formatDateOnly(endDate)}`;
+  }
+};
 
 export function ShowtimeSection({ showtimes, slug }: ShowtimeSectionProps) {
   const queryClient = useQueryClient();
@@ -182,7 +209,7 @@ export function ShowtimeSection({ showtimes, slug }: ShowtimeSectionProps) {
           <div className="flex items-center gap-2 px-4 py-4">
             <AccordionTrigger className="hover:no-underline flex-1 data-[state=open]:bg-muted/30">
               <span className="text-base font-medium text-foreground">
-                {showtime.time}, {showtime.date}
+                {formatDateTimeRange(showtime.startDate, showtime.endDate)}
               </span>
             </AccordionTrigger>
           </div>

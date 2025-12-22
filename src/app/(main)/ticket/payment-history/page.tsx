@@ -45,7 +45,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components";
 import { getMyPaymentTicket, getPaymentTicketStatus } from "~/api";
-import { formatPrice } from "~/utils";
+import { formatPrice, formatDateTime } from "~/utils";
 import type { TPaymentTicket } from "~/types";
 import { useAuthStore } from "~/stores";
 
@@ -54,27 +54,6 @@ const filterSchema = z.object({
 });
 
 type FilterFormDto = z.infer<typeof filterSchema>;
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("vi-VN", {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-  });
-};
-
-const formatTime = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatDateTime = (dateString: string) => {
-  return `${formatTime(dateString)}, ${formatDate(dateString)}`;
-};
 
 const getBlockchainExplorerUrl = (txhash: string) => {
   return `https://sepolia.etherscan.io/tx/${txhash}`;
@@ -218,10 +197,10 @@ export default function PaymentHistoryPage() {
       },
       {
         accessorKey: "ticketQuantity",
-        header: () => <div className="text-right">Số lượng</div>,
+        header: () => <div className="text-left">Số lượng</div>,
         cell: ({ row }) => {
           return (
-            <div className="text-right font-medium">
+            <div className="text-left font-medium">
               {row.getValue("ticketQuantity")} vé
             </div>
           );
@@ -229,11 +208,11 @@ export default function PaymentHistoryPage() {
       },
       {
         accessorKey: "tokenAmount",
-        header: () => <div className="text-right">Tổng tiền</div>,
+        header: () => <div className="text-left">Tổng tiền</div>,
         cell: ({ row }) => {
           const amount = parseFloat(row.getValue("tokenAmount") as string);
           return (
-            <div className="text-right font-medium text-primary">
+            <div className="text-left font-medium text-primary">
               {formatPrice(amount)} EVT
             </div>
           );

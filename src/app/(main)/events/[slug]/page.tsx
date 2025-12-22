@@ -17,6 +17,9 @@ import {
 import { ShowtimeSection } from "./components/showtime-section";
 import {
   formatPrice,
+  formatTime,
+  formatDate,
+  formatDateOnly,
   getResourceClientUrl,
   getResourceClientUrlWithDefaultAvatar,
 } from "~/utils";
@@ -74,39 +77,35 @@ export default function EventDetailPage({ params }: PageProps) {
     return getResourceClientUrl(imagePath);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
+  // Helper function to format date and time range
+  const formatDateTimeRange = (startDate: string, endDate: string): string => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+    // Check if same day
+    const isSameDay =
+      start.getDate() === end.getDate() &&
+      start.getMonth() === end.getMonth() &&
+      start.getFullYear() === end.getFullYear();
 
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    const startTime = formatTime(startDate);
+    const endTime = formatTime(endDate);
+
+    if (isSameDay) {
+      // Same day: "giờ:phút - giờ:phút, ngày"
+      return `${startTime} - ${endTime}, ${formatDateOnly(startDate)}`;
+    } else {
+      // Different days: "giờ:phút, ngày - giờ:phút, ngày"
+      return `${startTime}, ${formatDateOnly(
+        startDate
+      )} - ${endTime}, ${formatDateOnly(endDate)}`;
+    }
   };
 
   // Get first schedule for display
   const firstSchedule = event.schedules?.[0];
   const fullDate = firstSchedule
-    ? `${formatTime(firstSchedule.startDate)} - ${formatTime(
-        firstSchedule.endDate
-      )} | ${formatDateTime(firstSchedule.startDate)}`
+    ? formatDateTimeRange(firstSchedule.startDate, firstSchedule.endDate)
     : "Chưa có lịch";
 
   // Calculate min price from all ticket types
@@ -134,7 +133,9 @@ export default function EventDetailPage({ params }: PageProps) {
         time: `${formatTime(schedule.startDate)} - ${formatTime(
           schedule.endDate
         )}`,
-        date: formatDateTime(schedule.startDate),
+        date: formatDateOnly(schedule.startDate),
+        startDate: schedule.startDate,
+        endDate: schedule.endDate,
         tickets:
           scheduleWithTickets.ticketTypes?.map((ticket: TEventTicketType) => ({
             id: ticket.id,

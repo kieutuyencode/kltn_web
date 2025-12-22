@@ -188,3 +188,103 @@ export type TGetMyPaymentTicketDto = {
   limit?: number;
   page?: number;
 };
+
+export type TGetOrganizerPaymentTicketDto = {
+  eventId?: number;
+  scheduleId?: number;
+  statusId?: number;
+  paymentTxhash?: string;
+  limit?: number;
+  page?: number;
+};
+
+export type TPaymentOrganizerStatus = {
+  id: number;
+  name: string;
+  description?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type TPaymentOrganizer = {
+  id: number;
+  organizerAddress: string;
+  txhash?: string | null;
+  receiveAmount: string; // Decimal as string
+  feeAmount: string; // Decimal as string
+  scheduleId?: number | null;
+  eventId?: number | null;
+  userId?: number | null;
+  statusId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+  schedule?: TEventSchedule;
+  event?: TEvent;
+  status?: TPaymentOrganizerStatus;
+  user?: TUser;
+};
+
+export type TGetMyPaymentOrganizerDto = {
+  statusId?: number;
+  limit?: number;
+  page?: number;
+};
+
+export type TRequestSchedulePayoutDto = {
+  scheduleId: number;
+};
+
+export type TCheckInStatisticsOverview = {
+  totalCheckedIn: number;
+  totalSold: number;
+  checkInRate: number;
+};
+
+export type TCheckInStatisticsDetail = {
+  ticketTypeId: number;
+  ticketTypeName: string;
+  price: string;
+  checkedIn: number;
+  sold: number;
+  checkInRate: number;
+};
+
+export type TCheckInStatistics = {
+  overview: TCheckInStatisticsOverview;
+  details: TCheckInStatisticsDetail[];
+};
+
+export type TRevenueStatisticsOverview = {
+  totalRevenue: string; // Decimal as string
+  totalRevenueTarget: string; // Decimal as string
+  revenueRate: number;
+  totalTicketsSold: number;
+  totalTicketsTarget: number;
+  ticketsRate: number;
+};
+
+export type TRevenueStatisticsChartData = {
+  date: string;
+  revenue: number;
+  ticketsSold: number;
+};
+
+export type TRevenueStatisticsDetail = {
+  ticketTypeId: number;
+  ticketTypeName: string;
+  price: string; // Decimal as string
+  sold: number;
+  total: number;
+  salesRate: number;
+};
+
+export type TRevenueStatistics = {
+  overview: TRevenueStatisticsOverview;
+  chart: TRevenueStatisticsChartData[];
+  details: TRevenueStatisticsDetail[];
+};
+
+export type TGetRevenueStatisticsDto = {
+  scheduleId: number;
+  period?: "24h" | "30d";
+};

@@ -184,10 +184,6 @@ export function EventHeader() {
               <Plus className="w-4 h-4 mr-2" />
               Tạo sự kiện
             </Button>
-            <Button variant="outline">
-              <User className="w-4 h-4 mr-2" />
-              Tài khoản
-            </Button>
           </div>
         </div>
 

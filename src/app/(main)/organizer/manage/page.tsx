@@ -185,9 +185,17 @@ export default function Page() {
             value={selectedStatusId}
             onValueChange={(value) => {
               setSelectedStatusId(value);
-              // Reset query when status changes - queryKey change will auto-reset, but we ensure it
+              // Reset all queries that start with the base query key
               queryClient.resetQueries({
-                queryKey: getMyEvent.queryKey(),
+                predicate: (query) => {
+                  const queryKey = query.queryKey;
+                  return (
+                    Array.isArray(queryKey) &&
+                    queryKey.length >= 2 &&
+                    queryKey[0] === "events" &&
+                    queryKey[1] === "my"
+                  );
+                },
               });
             }}
           >
