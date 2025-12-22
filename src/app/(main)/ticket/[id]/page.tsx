@@ -125,6 +125,16 @@ export default function TicketDetailPage() {
     return `${time}, ${date}`;
   };
 
+  const isSameDay = (date1: string, date2: string) => {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
+  };
+
   const getImageUrl = (imagePath?: string) => {
     if (!imagePath) return "/logo.png";
     if (imagePath.startsWith("http")) return imagePath;
@@ -176,7 +186,7 @@ export default function TicketDetailPage() {
 
       if (receipt) {
         const txHash = tx.hash || receipt?.hash;
-        
+
         if (txHash) {
           try {
             // Gọi API để cập nhật lại chủ vé trên database
@@ -185,7 +195,7 @@ export default function TicketDetailPage() {
               email: data.email,
               txhash: txHash,
             });
-            
+
             toast.success("Chuyển giao vé thành công!");
             setShowTransferDialog(false);
             form.reset();
@@ -360,28 +370,64 @@ export default function TicketDetailPage() {
 
             <Separator />
 
-            <div className="flex items-start gap-3">
-              <Calendar className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Ngày diễn ra</p>
-                <p className="font-medium text-foreground">
-                  {formatDate(schedule.startDate)}
-                </p>
-              </div>
-            </div>
+            {isSameDay(schedule.startDate, schedule.endDate) ? (
+              <>
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">
+                      Ngày diễn ra
+                    </p>
+                    <p className="font-medium text-foreground">
+                      {formatDate(schedule.startDate)}
+                    </p>
+                  </div>
+                </div>
 
-            <Separator />
+                <Separator />
 
-            <div className="flex items-start gap-3">
-              <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Thời gian</p>
-                <p className="font-medium text-foreground">
-                  {formatTime(schedule.startDate)} -{" "}
-                  {formatTime(schedule.endDate)}
-                </p>
-              </div>
-            </div>
+                <div className="flex items-start gap-3">
+                  <Clock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">Thời gian</p>
+                    <p className="font-medium text-foreground">
+                      {formatTime(schedule.startDate)} -{" "}
+                      {formatTime(schedule.endDate)}
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">
+                      Ngày bắt đầu
+                    </p>
+                    <p className="font-medium text-foreground">
+                      {formatDate(schedule.startDate)} lúc{" "}
+                      {formatTime(schedule.startDate)}
+                    </p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">
+                      Ngày kết thúc
+                    </p>
+                    <p className="font-medium text-foreground">
+                      {formatDate(schedule.endDate)} lúc{" "}
+                      {formatTime(schedule.endDate)}
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
 
             <Separator />
 
