@@ -76,7 +76,7 @@ const navBar = [
         url: "/ticket",
       },
       {
-        title: "Lịch sử thanh toán",
+        title: "Lịch sử thanh toán vé",
         url: "/ticket/payment-history",
       },
     ],
