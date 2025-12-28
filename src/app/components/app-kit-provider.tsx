@@ -41,7 +41,9 @@ export const sepoliaTestnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ["https://1rpc.io/sepolia"],
+      http: [
+        "https://api.zan.top/node/v1/eth/sepolia/01d12cb5e45e43b6b9c0575538496148",
+      ],
     },
   },
   blockExplorers: {

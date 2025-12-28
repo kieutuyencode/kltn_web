@@ -154,7 +154,9 @@ export function SiteHeader() {
                   symbol: "ETH",
                   decimals: 18,
                 },
-                rpcUrls: ["https://1rpc.io/sepolia"],
+                rpcUrls: [
+                  "https://api.zan.top/node/v1/eth/sepolia/01d12cb5e45e43b6b9c0575538496148",
+                ],
                 blockExplorerUrls: ["https://sepolia.etherscan.io"],
               },
             ],
