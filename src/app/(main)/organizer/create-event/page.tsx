@@ -1,11 +1,11 @@
 "use client";
 import { EventStepper, Step1, Step2 } from "./components";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 const steps = ["Thông tin sự kiện", "Thời gian & Loại vé"];
 
-export default function Page() {
+function CreateEventContent() {
   const searchParams = useSearchParams();
   const editEventId = searchParams.get("edit");
   const [currentStep, setCurrentStep] = useState(1);
@@ -53,5 +53,13 @@ export default function Page() {
 
       <div className="mt-4">{renderStep()}</div>
     </>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CreateEventContent />
+    </Suspense>
   );
 }

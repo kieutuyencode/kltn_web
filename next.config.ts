@@ -22,6 +22,19 @@ const nextConfig: NextConfig = {
     unoptimized: process.env.NODE_ENV === "development",
   },
   devIndicators: false,
+  webpack: (config) => {
+    // Ignore test files and other unnecessary files from thread-stream
+    const webpack = require("webpack");
+    config.plugins = config.plugins || [];
+    config.plugins.push(
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^\.\/test\/|^\.\/bench\.js$|^\.\/LICENSE$|^\.\/README\.md$/,
+        contextRegExp: /thread-stream$/,
+      })
+    );
+
+    return config;
+  },
 };
 
 export default nextConfig;
