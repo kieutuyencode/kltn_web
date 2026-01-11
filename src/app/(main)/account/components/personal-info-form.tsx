@@ -123,6 +123,7 @@ export function PersonalInfoForm({ user }: PersonalInfoFormProps) {
     const submitData = {
       fullName: data.fullName,
       phone: data.phone,
+      description: data.description || undefined,
       ...(avatarFileName && { avatar: avatarFileName }),
     };
     updateProfileMutation.mutate(submitData);
