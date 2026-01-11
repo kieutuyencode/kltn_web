@@ -541,41 +541,32 @@ const SessionFormContent = ({
   });
 
   const onSubmit = async (data: SessionFormData) => {
-    try {
-      const scheduleData = {
-        startDate: new Date(data.startDate).toISOString(),
-        endDate: new Date(data.endDate).toISOString(),
-        organizerAddress: data.organizerAddress,
-      };
+    const scheduleData = {
+      startDate: new Date(data.startDate).toISOString(),
+      endDate: new Date(data.endDate).toISOString(),
+      organizerAddress: data.organizerAddress,
+    };
 
-      let scheduleId: number;
-      if (session?.id) {
-        // Update existing schedule
-        const response = await updateScheduleMutation.mutateAsync({
-          scheduleId: session.id,
-          data: scheduleData,
-        });
-        scheduleId = response.data.id;
-        toast.success(response.message || "Cập nhật suất diễn thành công!");
-      } else {
-        // Create new schedule
-        const response = await createScheduleMutation.mutateAsync({
-          eventId,
-          ...scheduleData,
-        });
-        scheduleId = response.data.id;
-        toast.success(response.message || "Tạo suất diễn thành công!");
-      }
-
-      onSave({ ...data, id: scheduleId });
-    } catch (error: any) {
-      console.error("Lỗi khi lưu suất diễn:", error);
-      toast.error(
-        error?.response?.data?.message ||
-          error?.message ||
-          "Đã có lỗi xảy ra khi lưu suất diễn."
-      );
+    let scheduleId: number;
+    if (session?.id) {
+      // Update existing schedule
+      const response = await updateScheduleMutation.mutateAsync({
+        scheduleId: session.id,
+        data: scheduleData,
+      });
+      scheduleId = response.data.id;
+      toast.success(response.message || "Cập nhật suất diễn thành công!");
+    } else {
+      // Create new schedule
+      const response = await createScheduleMutation.mutateAsync({
+        eventId,
+        ...scheduleData,
+      });
+      scheduleId = response.data.id;
+      toast.success(response.message || "Tạo suất diễn thành công!");
     }
+
+    onSave({ ...data, id: scheduleId });
   };
 
   const isLoading =
