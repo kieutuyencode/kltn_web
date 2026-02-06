@@ -36,7 +36,7 @@ A Next.js frontend for event ticketing and management, with wallet connection, o
 
    ```bash
    git clone <repository-url>
-   cd web
+   cd kltn_web
    ```
 
 2. **Install dependencies:**
@@ -50,10 +50,10 @@ A Next.js frontend for event ticketing and management, with wallet connection, o
    - Copy the example environment file:
 
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
 
-   - Edit `.env.local` and set:
+   - Edit `.env` and set:
 
    ```env
    NEXT_PUBLIC_REOWN_PROJECT_ID=your_reown_project_id
@@ -80,7 +80,7 @@ A Next.js frontend for event ticketing and management, with wallet connection, o
 ## Project Structure
 
 ```
-web/
+kltn_web/
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── (main)/                   # Main app: home, events, tickets, organizer, account
