@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   ChevronLeft,
@@ -12,7 +13,9 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { Badge, Button } from "~/components";
-import { Events } from "~/data";
+import { getPublicEvent } from "~/api";
+import { getResourceClientUrl, formatDateOnly } from "~/utils";
+import type { TEventWithDetails } from "~/types";
 
 interface CarouselEvent {
   id: string;
@@ -20,36 +23,40 @@ interface CarouselEvent {
   title: string;
   category: string;
   date: string;
-  performers: string[];
-  showtime: string;
-  venue: string;
   location: string;
-  hotline: string;
-  email: string;
-  description: string;
   minPrice: number;
+  slug: string;
 }
 
-const carouselEvents: CarouselEvent[] = Events.slice(0, 4).map(
-  (event, index) => ({
-    id: event.id,
-    image: event.image,
-    title: event.title,
-    category: event.category,
-    date: event.date,
-    performers: [event.category === "Fan Meeting" ? "Fan Meeting" : "Nghệ sĩ"],
-    showtime: ["17:00", "19:30", "20:00", "18:00"][index % 4],
-    venue: event.title.split(" ").slice(0, 3).join(" "),
-    location: event.date.split(", ").slice(0, -1).join(", "),
-    hotline: "1900 636 686",
-    email: "CHAT@CTICKET.VN",
-    description: `"${event.title}"`,
-    minPrice: 500000,
-  })
-);
+function mapToCarouselEvents(events: TEventWithDetails[]): CarouselEvent[] {
+  return events.slice(0, 4).map((event) => ({
+    id: String(event.id),
+    slug: event.slug,
+    image: getResourceClientUrl(event.image),
+    title: event.name,
+    category: event.category?.name ?? "",
+    date: event.schedules?.[0]?.startDate
+      ? formatDateOnly(event.schedules[0].startDate)
+      : "",
+    location: event.address ?? "",
+    minPrice: event.ticketType?.price
+      ? Number(event.ticketType.price)
+      : 0,
+  }));
+}
 
 export const EventCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const { data, isPending } = useQuery({
+    queryKey: getPublicEvent.queryKey({ limit: 4 }),
+    queryFn: () => getPublicEvent({ limit: 4 }),
+  });
+
+  const carouselEvents = useMemo(() => {
+    const rows = data?.data?.rows ?? [];
+    return mapToCarouselEvents(rows);
+  }, [data]);
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) =>
@@ -67,11 +74,16 @@ export const EventCarousel = () => {
     setCurrentIndex(index);
   };
 
-  const currentEvent = carouselEvents[currentIndex];
-
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price);
   };
+
+  if (isPending || carouselEvents.length === 0) {
+    return null;
+  }
+
+  const safeIndex = Math.min(currentIndex, carouselEvents.length - 1);
+  const currentEvent = carouselEvents[safeIndex];
 
   return (
     <div className="relative w-full overflow-hidden rounded-lg mb-12">
@@ -98,7 +110,7 @@ export const EventCarousel = () => {
               />
             </div>
             <Button size="lg" className="w-full" asChild>
-              <Link href={`/events/${currentEvent.id}`}>Xem chi tiết</Link>
+              <Link href={`/events/${currentEvent.slug}`}>Xem chi tiết</Link>
             </Button>
           </div>
 
@@ -144,7 +156,7 @@ export const EventCarousel = () => {
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-2 h-2 rounded-full transition-all ${
-                index === currentIndex
+                index === safeIndex
                   ? "bg-primary w-8"
                   : "bg-gray-500 hover:bg-gray-400"
               }`}

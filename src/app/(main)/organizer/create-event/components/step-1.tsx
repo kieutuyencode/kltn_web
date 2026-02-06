@@ -31,8 +31,8 @@ import {
   getEventDetail,
   patchUpdateEvent,
   getMyEvent,
+  getEventCategory,
 } from "~/api";
-import { EventCategory } from "~/data";
 import { API_URL } from "~/constants";
 import { generateSlug, getResourceClientUrl } from "~/utils";
 
@@ -83,6 +83,12 @@ export const Step1 = ({ eventId, onNext }: Step1Props) => {
     enabled: !!eventId,
     refetchOnMount: true, // Refetch when component mounts to ensure fresh data
   });
+
+  const { data: categoriesData } = useQuery({
+    queryKey: getEventCategory.queryKey(),
+    queryFn: getEventCategory,
+  });
+  const categories = categoriesData?.data ?? [];
 
   const form = useForm<EventFormDto>({
     resolver: zodResolver(eventFormSchema),
@@ -350,10 +356,8 @@ export const Step1 = ({ eventId, onNext }: Step1Props) => {
                         <SelectValue placeholder="Chọn danh mục" />
                       </SelectTrigger>
                       <SelectContent>
-                        {EventCategory.filter(
-                          (cat) => cat.name !== "Tất cả"
-                        ).map((cat, index) => (
-                          <SelectItem key={index} value={String(index + 1)}>
+                        {(categories ?? []).map((cat) => (
+                          <SelectItem key={cat.id} value={String(cat.id)}>
                             {cat.name}
                           </SelectItem>
                         ))}
